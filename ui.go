@@ -25,9 +25,19 @@ func createHTMLTemplate() {
         <div class="main-content">
             <!-- 接收部分TAB -->
             <div class="tab-content active" id="receive-tab">
-                <!-- 服务器配置区域 -->
+                <!-- 项目配置区域 -->
                 <section class="section compact">
-                    <h2>服务器配置</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin: 0;">项目配置</h2>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <label style="margin: 0;">项目:</label>
+                            <select id="project-select" onchange="switchProject()" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; background: white;">
+                                <!-- 动态填充项目列表 -->
+                            </select>
+                            <button onclick="createNewProject()" class="btn btn-info" style="padding: 5px 15px; white-space: nowrap;">+ 新建项目</button>
+                            <button onclick="saveProjectConfig()" class="btn btn-primary" style="padding: 5px 15px; white-space: nowrap;">保存项目配置</button>
+                        </div>
+                    </div>
                     <div class="config-form">
                         <div class="form-row">
                             <div class="form-group">
@@ -41,7 +51,6 @@ func createHTMLTemplate() {
                             <div class="form-actions">
                                 <button id="start-server" class="btn btn-primary">启动</button>
                                 <button id="stop-server" class="btn btn-secondary" disabled>停止</button>
-                                <button id="save-config" class="btn btn-info">保存</button>
                             </div>
                             <div class="status-inline">
                                 <span id="server-status" class="status-stopped">已停止</span>
@@ -721,6 +730,7 @@ func createJSFile() {
 
     init() {
         this.bindEvents();
+        this.loadProjects();
         this.loadStatus();
         this.loadJSONFiles();
         this.initTabs();
@@ -757,7 +767,6 @@ func createJSFile() {
         // 服务器控制
         document.getElementById('start-server').addEventListener('click', () => this.startServer());
         document.getElementById('stop-server').addEventListener('click', () => this.stopServer());
-        document.getElementById('save-config').addEventListener('click', () => this.saveConfig());
 
         // 发送请求
         document.getElementById('send-request').addEventListener('click', () => this.sendRequest());
@@ -1251,6 +1260,104 @@ func createJSFile() {
             document.body.removeChild(messageDiv);
         }, 3000);
     }
+
+    // 加载项目列表
+    async loadProjects() {
+        try {
+            const response = await fetch('/api/projects');
+            const projects = await response.json();
+
+            // 获取当前项目
+            const statusResponse = await fetch('/api/status');
+            const status = await statusResponse.json();
+            const currentProject = status.current_project || 'default';
+
+            const select = document.getElementById('project-select');
+            select.innerHTML = '';
+
+            projects.forEach(proj => {
+                const option = document.createElement('option');
+                option.value = proj.name;
+                option.textContent = proj.name;
+                // 设置当前项目为选中状态
+                if (proj.name === currentProject) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('加载项目列表失败:', error);
+        }
+    }
+}
+
+// 全局函数：切换项目
+async function switchProject() {
+    const select = document.getElementById('project-select');
+    const projectName = select.value;
+
+    try {
+        const response = await fetch('/api/switch-project', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project: projectName })
+        });
+
+        if (response.ok) {
+            // 重新加载状态和文件列表
+            window.location.reload();
+        } else {
+            const error = await response.json();
+            alert('切换项目失败: ' + error.error);
+        }
+    } catch (error) {
+        alert('切换项目失败: ' + error.message);
+    }
+}
+
+// 全局函数：创建新项目
+async function createNewProject() {
+    const projectName = prompt('请输入项目名称:');
+    if (!projectName) return;
+
+    // 验证项目名
+    if (projectName.includes('/') || projectName.includes('\\') || projectName.includes('..')) {
+        alert('项目名称包含非法字符！');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/projects', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: projectName })
+        });
+
+        if (response.ok) {
+            alert('项目创建成功！');
+            // 重新加载项目列表
+            await tool.loadProjects();
+            // 切换到新项目
+            document.getElementById('project-select').value = projectName;
+            await switchProject();
+        } else {
+            const error = await response.json();
+            alert('项目创建失败: ' + error.error);
+        }
+    } catch (error) {
+        alert('项目创建失败: ' + error.message);
+    }
+}
+
+// 全局函数：保存项目配置
+async function saveProjectConfig() {
+    try {
+        // 调用工具类的保存配置方法
+        await tool.saveConfig();
+        alert('项目配置保存成功！');
+    } catch (error) {
+        alert('保存项目配置失败: ' + error.message);
+    }
 }
 
 // 初始化应用
@@ -1326,7 +1433,13 @@ func createSampleJSONFiles() {
 }`,
 	}
 
+	// 在默认项目目录下创建示例文件
+	jsonFilesPath := filepath.Join("projects", "default", "json_files")
 	for filename, content := range sampleFiles {
-		os.WriteFile(filepath.Join("json_files", filename), []byte(content), 0644)
+		filePath := filepath.Join(jsonFilesPath, filename)
+		// 如果文件不存在才创建
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			os.WriteFile(filePath, []byte(content), 0644)
+		}
 	}
 }

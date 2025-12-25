@@ -52,12 +52,20 @@ type SendRequest struct {
 }
 
 type Config struct {
-	IP        string           `json:"ip"`
-	Port      string           `json:"port"`
-	Endpoints []EndpointConfig `json:"endpoints"`
+	IP             string           `json:"ip"`
+	Port           string           `json:"port"`
+	CurrentProject string           `json:"current_project"`
+	Endpoints      []EndpointConfig `json:"endpoints"`
+}
+
+type ProjectInfo struct {
+	Name      string `json:"name"`
+	Path      string `json:"path"`
+	CreatedAt string `json:"created_at"`
 }
 
 var server *Server
+var currentProject = "default"
 
 func init() {
 	server = &Server{
@@ -82,14 +90,23 @@ func init() {
 }
 
 func main() {
+	// 初始化项目结构
+	if err := initializeProjects(); err != nil {
+		log.Printf("初始化项目结构失败: %v", err)
+	}
+
 	// 创建必要的目录和文件
 	os.MkdirAll("templates", 0755)
 	os.MkdirAll("static", 0755)
-	os.MkdirAll("json_files", 0755)
 
-	// 加载配置文件
+	// 加载全局配置文件
+	if err := loadGlobalConfig(); err != nil {
+		log.Printf("加载全局配置文件失败: %v", err)
+	}
+
+	// 加载当前项目配置
 	if err := loadConfig(); err != nil {
-		log.Printf("加载配置文件失败: %v", err)
+		log.Printf("加载项目配置文件失败: %v", err)
 	}
 
 	createHTMLTemplate()
@@ -101,7 +118,7 @@ func main() {
 
 	// 静态文件服务
 	r.Static("/static", "./static")
-	r.Static("/json_files", "./json_files")
+	r.Static("/json_files", getJSONFilesPath(currentProject))
 	r.LoadHTMLGlob("templates/*")
 
 	// 主页
@@ -123,6 +140,9 @@ func main() {
 		api.POST("/send", sendRequest)
 		api.GET("/files", listJSONFiles)
 		api.POST("/save-json", saveJSONFile)
+		api.GET("/projects", listProjects)
+		api.POST("/projects", createProject)
+		api.POST("/switch-project", switchProject)
 	}
 
 	log.Println("HTTP+JSON工具启动在 http://localhost:8080")
@@ -193,7 +213,16 @@ func getStatus(c *gin.Context) {
 	server.mu.RLock()
 	defer server.mu.RUnlock()
 
-	c.JSON(http.StatusOK, server)
+	response := map[string]interface{}{
+		"ip":           server.IP,
+		"port":         server.Port,
+		"is_running":   server.IsRunning,
+		"endpoints":    server.Endpoints,
+		"request_logs": server.RequestLogs,
+		"current_project": currentProject,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func startServer(c *gin.Context) {
@@ -322,7 +351,7 @@ func handleDynamicEndpoint(c *gin.Context, path, responseFile string) {
 
 	// 返回响应数据
 	if responseFile != "" {
-		data, err := os.ReadFile(filepath.Join("json_files", responseFile))
+		data, err := os.ReadFile(filepath.Join(getJSONFilesPath(currentProject), responseFile))
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"message": "默认响应", "timestamp": time.Now()})
 		} else {
@@ -407,7 +436,7 @@ func sendRequest(c *gin.Context) {
 }
 
 func listJSONFiles(c *gin.Context) {
-	files, err := filepath.Glob("json_files/*.json")
+	files, err := filepath.Glob(filepath.Join(getJSONFilesPath(currentProject), "*.json"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -446,7 +475,7 @@ func saveJSONFile(c *gin.Context) {
 	}
 
 	// 保存文件
-	filePath := filepath.Join("json_files", request.Filename)
+	filePath := filepath.Join(getJSONFilesPath(currentProject), request.Filename)
 	if err := os.WriteFile(filePath, []byte(request.Content), 0644); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存文件失败: " + err.Error()})
 		return
@@ -455,7 +484,7 @@ func saveJSONFile(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "文件保存成功"})
 }
 
-const configFileName = "config.json"
+const globalConfigFileName = "config.json"
 
 func saveConfig() error {
 	server.mu.RLock()
@@ -471,14 +500,16 @@ func saveConfig() error {
 		return err
 	}
 
-	return os.WriteFile(configFileName, data, 0644)
+	configPath := filepath.Join(getProjectPath(currentProject), "config.json")
+	return os.WriteFile(configPath, data, 0644)
 }
 
 func loadConfig() error {
-	data, err := os.ReadFile(configFileName)
+	configPath := filepath.Join(getProjectPath(currentProject), "config.json")
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			log.Println("配置文件不存在，使用默认配置")
+			log.Println("项目配置文件不存在，使用默认配置")
 			return nil
 		}
 		return err
@@ -495,6 +526,212 @@ func loadConfig() error {
 	server.Endpoints = config.Endpoints
 	server.mu.Unlock()
 
-	log.Println("配置文件加载成功")
+	log.Printf("项目 %s 配置文件加载成功", currentProject)
 	return nil
+}
+
+func saveGlobalConfig() error {
+	config := Config{
+		IP:             server.IP,
+		Port:           server.Port,
+		CurrentProject: currentProject,
+		Endpoints:      server.Endpoints,
+	}
+
+	data, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(globalConfigFileName, data, 0644)
+}
+
+func loadGlobalConfig() error {
+	data, err := os.ReadFile(globalConfigFileName)
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Println("全局配置文件不存在，使用默认配置")
+			currentProject = "default"
+			return nil
+		}
+		return err
+	}
+
+	var config Config
+	if err := json.Unmarshal(data, &config); err != nil {
+		return err
+	}
+
+	if config.CurrentProject != "" {
+		currentProject = config.CurrentProject
+	}
+
+	log.Printf("全局配置加载成功，当前项目: %s", currentProject)
+	return nil
+}
+
+// 项目管理辅助函数
+func getProjectPath(project string) string {
+	return filepath.Join("projects", project)
+}
+
+func getJSONFilesPath(project string) string {
+	return filepath.Join(getProjectPath(project), "json_files")
+}
+
+func getConfigPath(project string) string {
+	return filepath.Join(getProjectPath(project), "config.json")
+}
+
+// 初始化项目结构
+func initializeProjects() error {
+	// 创建projects目录
+	if err := os.MkdirAll("projects", 0755); err != nil {
+		return err
+	}
+
+	// 检查default项目是否存在
+	defaultPath := getProjectPath("default")
+	if _, err := os.Stat(defaultPath); os.IsNotExist(err) {
+		// 创建default项目
+		if err := os.MkdirAll(defaultPath, 0755); err != nil {
+			return err
+		}
+		if err := os.MkdirAll(getJSONFilesPath("default"), 0755); err != nil {
+			return err
+		}
+
+		// 迁移旧的json_files目录
+		if _, err := os.Stat("json_files"); err == nil {
+			log.Println("检测到旧的json_files目录，正在迁移到projects/default/...")
+			files, _ := filepath.Glob("json_files/*.json")
+			for _, file := range files {
+				filename := filepath.Base(file)
+				data, _ := os.ReadFile(file)
+				os.WriteFile(filepath.Join(getJSONFilesPath("default"), filename), data, 0644)
+			}
+			log.Println("迁移完成")
+		}
+
+		log.Println("默认项目创建成功")
+	}
+
+	return nil
+}
+
+// API: 列出所有项目
+func listProjects(c *gin.Context) {
+	entries, err := os.ReadDir("projects")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var projects []ProjectInfo
+	for _, entry := range entries {
+		if entry.IsDir() {
+			info, _ := entry.Info()
+			projects = append(projects, ProjectInfo{
+				Name:      entry.Name(),
+				Path:      getProjectPath(entry.Name()),
+				CreatedAt: info.ModTime().Format("2006-01-02 15:04:05"),
+			})
+		}
+	}
+
+	c.JSON(http.StatusOK, projects)
+}
+
+// API: 创建新项目
+func createProject(c *gin.Context) {
+	var request struct {
+		Name string `json:"name"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 验证项目名
+	if request.Name == "" || strings.Contains(request.Name, "..") || strings.Contains(request.Name, "/") || strings.Contains(request.Name, "\\") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "非法项目名"})
+		return
+	}
+
+	projectPath := getProjectPath(request.Name)
+	if _, err := os.Stat(projectPath); err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "项目已存在"})
+		return
+	}
+
+	// 创建项目目录
+	if err := os.MkdirAll(projectPath, 0755); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建项目失败: " + err.Error()})
+		return
+	}
+
+	// 创建json_files目录
+	if err := os.MkdirAll(getJSONFilesPath(request.Name), 0755); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建目录失败: " + err.Error()})
+		return
+	}
+
+	// 创建默认配置文件
+	defaultConfig := Config{
+		IP:   "192.168.1.100",
+		Port: "29800",
+		Endpoints: []EndpointConfig{
+			{Path: "/api/test1", ResponseFile: "", IsActive: true},
+			{Path: "/api/test2", ResponseFile: "", IsActive: true},
+			{Path: "/api/test3", ResponseFile: "", IsActive: true},
+			{Path: "/api/test4", ResponseFile: "", IsActive: true},
+			{Path: "/api/test5", ResponseFile: "", IsActive: true},
+		},
+	}
+
+	data, _ := json.MarshalIndent(defaultConfig, "", "  ")
+	os.WriteFile(getConfigPath(request.Name), data, 0644)
+
+	c.JSON(http.StatusOK, gin.H{"message": "项目创建成功"})
+}
+
+// API: 切换项目
+func switchProject(c *gin.Context) {
+	var request struct {
+		Project string `json:"project"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 验证项目是否存在
+	projectPath := getProjectPath(request.Project)
+	if _, err := os.Stat(projectPath); os.IsNotExist(err) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "项目不存在"})
+		return
+	}
+
+	// 保存当前项目配置
+	if err := saveConfig(); err != nil {
+		log.Printf("保存当前项目配置失败: %v", err)
+	}
+
+	// 切换项目
+	currentProject = request.Project
+
+	// 加载新项目配置
+	if err := loadConfig(); err != nil {
+		log.Printf("加载新项目配置失败: %v", err)
+	}
+
+	// 保存全局配置
+	if err := saveGlobalConfig(); err != nil {
+		log.Printf("保存全局配置失败: %v", err)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "项目切换成功"})
+	broadcastToClients(map[string]interface{}{"type": "status_update", "data": server})
 }

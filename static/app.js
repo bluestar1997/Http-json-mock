@@ -7,6 +7,7 @@ class HTTPJSONTool {
 
     init() {
         this.bindEvents();
+        this.loadProjects();
         this.loadStatus();
         this.loadJSONFiles();
         this.initTabs();
@@ -43,7 +44,6 @@ class HTTPJSONTool {
         // 服务器控制
         document.getElementById('start-server').addEventListener('click', () => this.startServer());
         document.getElementById('stop-server').addEventListener('click', () => this.stopServer());
-        document.getElementById('save-config').addEventListener('click', () => this.saveConfig());
 
         // 发送请求
         document.getElementById('send-request').addEventListener('click', () => this.sendRequest());
@@ -539,6 +539,104 @@ class HTTPJSONTool {
         setTimeout(() => {
             document.body.removeChild(messageDiv);
         }, 3000);
+    }
+
+    // 加载项目列表
+    async loadProjects() {
+        try {
+            const response = await fetch('/api/projects');
+            const projects = await response.json();
+
+            // 获取当前项目
+            const statusResponse = await fetch('/api/status');
+            const status = await statusResponse.json();
+            const currentProject = status.current_project || 'default';
+
+            const select = document.getElementById('project-select');
+            select.innerHTML = '';
+
+            projects.forEach(proj => {
+                const option = document.createElement('option');
+                option.value = proj.name;
+                option.textContent = proj.name;
+                // 设置当前项目为选中状态
+                if (proj.name === currentProject) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('加载项目列表失败:', error);
+        }
+    }
+}
+
+// 全局函数：切换项目
+async function switchProject() {
+    const select = document.getElementById('project-select');
+    const projectName = select.value;
+
+    try {
+        const response = await fetch('/api/switch-project', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project: projectName })
+        });
+
+        if (response.ok) {
+            // 重新加载状态和文件列表
+            window.location.reload();
+        } else {
+            const error = await response.json();
+            alert('切换项目失败: ' + error.error);
+        }
+    } catch (error) {
+        alert('切换项目失败: ' + error.message);
+    }
+}
+
+// 全局函数：创建新项目
+async function createNewProject() {
+    const projectName = prompt('请输入项目名称:');
+    if (!projectName) return;
+
+    // 验证项目名
+    if (projectName.includes('/') || projectName.includes('\\') || projectName.includes('..')) {
+        alert('项目名称包含非法字符！');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/projects', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: projectName })
+        });
+
+        if (response.ok) {
+            alert('项目创建成功！');
+            // 重新加载项目列表
+            await tool.loadProjects();
+            // 切换到新项目
+            document.getElementById('project-select').value = projectName;
+            await switchProject();
+        } else {
+            const error = await response.json();
+            alert('项目创建失败: ' + error.error);
+        }
+    } catch (error) {
+        alert('项目创建失败: ' + error.message);
+    }
+}
+
+// 全局函数：保存项目配置
+async function saveProjectConfig() {
+    try {
+        // 调用工具类的保存配置方法
+        await tool.saveConfig();
+        alert('项目配置保存成功！');
+    } catch (error) {
+        alert('保存项目配置失败: ' + error.message);
     }
 }
 

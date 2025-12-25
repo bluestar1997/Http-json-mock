@@ -43,4 +43,5 @@ config.json
 # 忽略特定的本地目录
 /vibec/
 /.claude/
+/projects/
 
