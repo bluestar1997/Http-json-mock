@@ -1,0 +1,220 @@
+{
+    "error": "SUCCESS",
+    "nonce": "f89b0ab0e5ae4241a03f03acab459778",
+    "timestamp": 1756876327050,
+    "data": {
+        "result": "REJECT",
+        "textRisks": [
+            {
+                "riskLabel1": "涉政",
+                "riskLabel2": "落马官员",
+                "riskLabel3": "厅局级及以下落马官员",
+                "text": "白泉",
+                "startTime": 275,
+                "endTime": 276,
+                "rate": 100.0,
+                "result": "REJECT",
+                "target": "语音识别"
+            },
+            {
+                "riskLabel1": "涉政",
+                "riskLabel2": "涉政组织",
+                "riskLabel3": "其他组织机构及政党",
+                "text": "国民党",
+                "startTime": 1708,
+                "endTime": 1711,
+                "rate": 100.0,
+                "result": "REJECT",
+                "target": "语音识别"
+            },
+            {
+                "riskLabel1": "涉政",
+                "riskLabel2": "涉政组织",
+                "riskLabel3": "其他组织机构及政党",
+                "text": "国民党",
+                "startTime": 1743,
+                "endTime": 1745,
+                "rate": 100.0,
+                "result": "REJECT",
+                "target": "语音识别"
+            }
+        ],
+        "imageRisks": [
+            {
+                "riskLabel1": "涉政",
+                "riskLabel2": "反动分裂",
+                "riskLabel3": "台独",
+                "text": "台独_青天白日满地红旗",
+                "url": "http://192.169.204.169:8080/aiaudit_test/frame/2025-09-03/1871751379224163636/5000.jpg",
+                "time": 5,
+                "rate": 85.0,
+                "locations": [
+                    {
+                        "topLeftX": 1244.0,
+                        "topLeftY": 102.0,
+                        "bottomRightX": 1526.0,
+                        "bottomRightY": 324.0,
+                        "contents": [
+                            "台独_青天白日满地红旗"
+                        ],
+                        "originPosition": "topLeft",
+                        "angle": 0.0,
+                        "rate": 85.0
+                    }
+                ],
+                "result": "REVIEW",
+                "allLabels": [
+                    {
+                        "riskLabel1": "涉政",
+                        "riskLabel2": "反动分裂",
+                        "riskLabel3": "台独",
+                        "rate": 85.0,
+                        "text": "台独_青天白日满地红旗",
+                        "result": "REVIEW",
+                        "target": "标志识别",
+                        "locations": [
+                            {
+                                "topLeftX": 1244.0,
+                                "topLeftY": 102.0,
+                                "bottomRightX": 1526.0,
+                                "bottomRightY": 324.0,
+                                "contents": [
+                                    "台独_青天白日满地红旗"
+                                ],
+                                "originPosition": "topLeft",
+                                "angle": 0.0,
+                                "rate": 85.0
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "riskLabel1": "暴恐",
+                "riskLabel2": "暴恐场景",
+                "riskLabel3": "暴乱",
+                "url": "http://192.169.204.169:8080/aiaudit_test/frame/2025-09-03/1871751379224163636/9000.jpg",
+                "time": 9,
+                "rate": 86.0,
+                "result": "REVIEW",
+                "allLabels": [
+                    {
+                        "riskLabel1": "暴恐",
+                        "riskLabel2": "暴恐场景",
+                        "riskLabel3": "暴乱",
+                        "rate": 86.0,
+                        "result": "REVIEW",
+                        "target": "场景识别"
+                    }
+                ]
+            },
+            {
+                "riskLabel1": "社会",
+                "riskLabel2": "不良言行",
+                "riskLabel3": "喝酒",
+                "url": "http://192.169.204.169:8080/aiaudit_test/frame/2025-09-03/1871751379224163636/2539000.jpg",
+                "time": 2539,
+                "rate": 88.0,
+                "result": "REVIEW",
+                "allLabels": [
+                    {
+                        "riskLabel1": "社会",
+                        "riskLabel2": "不良言行",
+                        "riskLabel3": "喝酒",
+                        "rate": 88.0,
+                        "result": "REVIEW",
+                        "target": "场景识别"
+                    }
+                ]
+            },
+            {
+                "riskLabel1": "涉政",
+                "riskLabel2": "反动分裂",
+                "riskLabel3": "台独",
+                "text": "中华民国徽记",
+                "url": "http://192.169.204.169:8080/aiaudit_test/frame/2025-09-03/1871751379224163636/2690000.jpg",
+                "time": 2690,
+                "rate": 85.0,
+                "locations": [
+                    {
+                        "topLeftX": 1100.0,
+                        "topLeftY": 1.0,
+                        "bottomRightX": 1231.0,
+                        "bottomRightY": 80.0,
+                        "contents": [
+                            "中华民国徽记"
+                        ],
+                        "originPosition": "topLeft",
+                        "angle": 0.0,
+                        "rate": 85.0
+                    }
+                ],
+                "result": "REVIEW",
+                "allLabels": [
+                    {
+                        "riskLabel1": "涉政",
+                        "riskLabel2": "反动分裂",
+                        "riskLabel3": "台独",
+                        "rate": 85.0,
+                        "text": "中华民国徽记",
+                        "result": "REVIEW",
+                        "target": "标志识别",
+                        "locations": [
+                            {
+                                "topLeftX": 1100.0,
+                                "topLeftY": 1.0,
+                                "bottomRightX": 1231.0,
+                                "bottomRightY": 80.0,
+                                "contents": [
+                                    "中华民国徽记"
+                                ],
+                                "originPosition": "topLeft",
+                                "angle": 0.0,
+                                "rate": 85.0
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "asrResults": [
+            {
+                "text": "这个寺院被我们武力征用了",
+                "startTime": 39,
+                "endTime": 42
+            },
+            {
+                "text": "这就是你们一队一训练出来的女人",
+                "startTime": 53,
+                "endTime": 155
+            },
+            {
+                "text": "通知下去",
+                "startTime": 155,
+                "endTime": 155
+            },
+            {
+                "text": "这里不能再住了",
+                "startTime": 155,
+                "endTime": 157
+            },
+            {
+                "text": "我们要马上向寺院靠拢",
+                "startTime": 157,
+                "endTime": 159
+            },
+            {
+                "text": "是啊",
+                "startTime": 159,
+                "endTime": 159
+            }
+        ],
+        "business_data": "{\"businessType\":1,\"subTaskId\":\"SUB_196_20250903111038_f49ac4e9\"}"
+    },
+    "error_code": 0,
+    "error_message": "成功",
+    "app_id": "audit_8U5zmpUgHfZL",
+    "audit_id": "2965120736916955136",
+    "task_id": "1871751379224163636",
+    "sign": "4e851897c8b72ceea93e3d4d1912e094c0da0031"
+}

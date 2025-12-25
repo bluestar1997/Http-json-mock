@@ -1,0 +1,11 @@
+{
+    "taskId": "audio_task_001",
+    "status": "completed",
+    "result": {
+        "duration": 120.5,
+        "quality": "excellent",
+        "transcription": "这是一个音频任务的审核结果示例",
+        "confidence": 0.95
+    },
+    "timestamp": "2024-01-01T14:30:00Z"
+}

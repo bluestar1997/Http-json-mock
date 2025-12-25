@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP+JSON协议收发工具</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- TAB导航 -->
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="receive">接收部分</button>
+            <button class="tab-btn" data-tab="send">发送部分</button>
+        </div>
+
+        <div class="main-content">
+            <!-- 接收部分TAB -->
+            <div class="tab-content active" id="receive-tab">
+                <!-- 服务器配置区域 -->
+                <section class="section compact">
+                    <h2>服务器配置</h2>
+                    <div class="config-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>监听地址:</label>
+                                <input type="text" id="server-ip" value="192.168.1.100" placeholder="IP地址">
+                            </div>
+                            <div class="form-group">
+                                <label>端口:</label>
+                                <input type="text" id="server-port" value="29800" placeholder="端口">
+                            </div>
+                            <div class="form-actions">
+                                <button id="start-server" class="btn btn-primary">启动</button>
+                                <button id="stop-server" class="btn btn-secondary" disabled>停止</button>
+                                <button id="save-config" class="btn btn-info">保存</button>
+                            </div>
+                            <div class="status-inline">
+                                <span id="server-status" class="status-stopped">已停止</span>
+                                <span id="server-url"></span>
+                                <span id="error-message" class="error-message" style="display: none;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 接口配置区域 -->
+                <section class="section compact">
+                    <h2>接口配置 (最多5个)</h2>
+                    <div id="endpoints-config" class="endpoints-grid-2cols">
+                        <!-- 动态生成接口配置 -->
+                    </div>
+
+                    <!-- JSON文件编辑区域 -->
+                    <div id="json-editor" class="json-editor" style="display: none;">
+                        <div class="json-editor-header">
+                            <h3 id="json-file-name">编辑JSON文件</h3>
+                            <div class="json-editor-actions">
+                                <button id="save-json" class="btn btn-primary">保存</button>
+                                <button id="close-json-editor" class="btn btn-secondary">关闭</button>
+                            </div>
+                        </div>
+                        <textarea id="json-content" class="json-textarea" placeholder="JSON内容..."></textarea>
+                    </div>
+                </section>
+
+                <!-- 接收日志区域 -->
+                <section class="section">
+                    <h2>接收日志 (最近收到的请求)</h2>
+                    <div class="logs-container">
+                        <div class="logs-actions">
+                            <button id="clear-logs" class="btn btn-secondary">清空</button>
+                            <button id="refresh-logs" class="btn btn-info">刷新</button>
+                        </div>
+                        <div id="request-logs" class="logs-grid"></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 发送部分TAB -->
+            <div class="tab-content" id="send-tab">
+                <!-- 发送请求区域 -->
+                <section class="section compact">
+                    <h2>发送HTTP请求</h2>
+                    <div class="request-form">
+                        <div class="form-row">
+                            <div class="form-group flex-grow">
+                                <label>URL:</label>
+                                <input type="text" id="request-url" placeholder="http://example.com/api/test">
+                            </div>
+                            <div class="form-group">
+                                <label>方法:</label>
+                                <select id="request-method">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                    <option value="PUT">PUT</option>
+                                    <option value="DELETE">DELETE</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>请求头:</label>
+                                <input type="text" id="request-headers" placeholder='{"Content-Type": "application/json"}'>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>请求数据 (JSON):</label>
+                            <textarea id="request-data" placeholder='{"key": "value"}' rows="6"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button id="send-request" class="btn btn-primary">发送</button>
+                            <button id="format-json" class="btn btn-info">格式化</button>
+                        </div>
+                    </div>
+
+                    <!-- 响应结果 -->
+                    <div class="response-section">
+                        <h3>响应结果:</h3>
+                        <pre id="response-result"></pre>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

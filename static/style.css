@@ -1,0 +1,569 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: #2c3e50;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.main-content {
+    display: grid;
+    gap: 30px;
+}
+
+.section {
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.section h2 {
+    color: #2c3e50;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.section h3 {
+    color: #34495e;
+    margin: 15px 0 10px;
+}
+
+.config-form {
+    display: grid;
+    gap: 15px;
+}
+
+.compact {
+    padding: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.form-row .form-group {
+    flex: 0 0 auto;
+}
+
+.form-row .flex-grow {
+    flex: 1 1 auto;
+    min-width: 200px;
+}
+
+.endpoints-grid {
+    display: grid;
+    gap: 10px;
+}
+
+.endpoints-grid-2cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* TAB导航样式 */
+.tab-nav {
+    display: flex;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 20px;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    background: #f8f9fa;
+    color: #666;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #2c3e50;
+    border-bottom-color: #3498db;
+}
+
+/* TAB内容样式 */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* JSON编辑器样式 */
+.json-editor {
+    margin-top: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.json-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    border-radius: 5px 5px 0 0;
+}
+
+.json-editor-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.json-editor-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.json-editor-actions .btn {
+    padding: 5px 12px;
+    font-size: 12px;
+}
+
+.json-textarea {
+    width: 100%;
+    height: 200px;
+    padding: 15px;
+    border: none;
+    border-radius: 0 0 5px 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    resize: vertical;
+    min-height: 150px;
+}
+
+.logs-grid {
+    display: grid;
+    gap: 8px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: 'Courier New', monospace;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+    text-transform: uppercase;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #7f8c8d;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.status-inline {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 15px;
+    font-size: 13px;
+}
+
+.status-running {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.status-stopped {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.endpoint-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 8px;
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.endpoint-item.active {
+    border-color: #3498db;
+    background: #f8f9fa;
+}
+
+.endpoint-checkbox {
+    flex: 0 0 auto;
+}
+
+.endpoint-path {
+    flex: 1 1 auto;
+    min-width: 120px;
+}
+
+.endpoint-path input {
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.endpoint-file {
+    flex: 0 0 auto;
+    min-width: 100px;
+}
+
+.endpoint-file select {
+    flex: 1;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 11px;
+}
+
+.endpoint-file {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.btn-edit {
+    padding: 3px 6px;
+    border: 1px solid #3498db;
+    background: #3498db;
+    color: white;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 10px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-edit:hover {
+    background: #2980b9;
+    border-color: #2980b9;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.file-select {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.request-form {
+    display: grid;
+    gap: 15px;
+}
+
+.response-section {
+    margin-top: 20px;
+}
+
+#response-result {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 15px;
+    border-radius: 5px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+}
+
+.logs-container {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.logs-actions {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+#request-logs {
+    display: grid;
+    gap: 10px;
+}
+
+.log-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    background: #f9f9f9;
+    font-size: 13px;
+}
+
+.log-item:hover {
+    background: #f0f0f0;
+}
+
+.log-header {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.log-content {
+    background: #fff;
+    padding: 8px;
+    border-radius: 3px;
+    margin-top: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    max-height: 120px;
+    overflow-y: auto;
+    word-break: break-all;
+}
+
+.log-method {
+    padding: 3px 8px;
+    border-radius: 3px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.log-method.GET { background-color: #28a745; }
+.log-method.POST { background-color: #ffc107; color: #000; }
+.log-method.PUT { background-color: #17a2b8; }
+.log-method.DELETE { background-color: #dc3545; }
+
+.log-details {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 3px;
+    margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.toggle-btn {
+    background: none;
+    border: 1px solid #3498db;
+    color: #3498db;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.toggle-btn:hover {
+    background-color: #3498db;
+    color: white;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .endpoint-controls {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .log-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* JSON语法高亮 */
+.json-string { color: #d14; }
+.json-number { color: #099; }
+.json-boolean { color: #0969da; }
+.json-null { color: #6f42c1; }
+.json-key { color: #e36209; }
