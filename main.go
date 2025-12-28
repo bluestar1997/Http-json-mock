@@ -21,6 +21,7 @@ type Server struct {
 	Port              string                 `json:"port"`
 	IsRunning         bool                   `json:"is_running"`
 	Endpoints         []EndpointConfig       `json:"endpoints"`
+	SendBlocks        []SendBlock            `json:"send_blocks"`
 	RequestLogs       []RequestLog           `json:"request_logs"`
 	mu                sync.RWMutex
 	engine            *gin.Engine
@@ -30,9 +31,9 @@ type Server struct {
 }
 
 type EndpointConfig struct {
+	Name         string `json:"name"`
 	Path         string `json:"path"`
 	ResponseFile string `json:"response_file"`
-	IsActive     bool   `json:"is_active"`
 }
 
 type RequestLog struct {
@@ -56,6 +57,15 @@ type Config struct {
 	Port           string           `json:"port"`
 	CurrentProject string           `json:"current_project"`
 	Endpoints      []EndpointConfig `json:"endpoints"`
+	SendBlocks     []SendBlock      `json:"send_blocks"`
+}
+
+type SendBlock struct {
+	Name     string `json:"name"`
+	URL      string `json:"url"`
+	SendFile string `json:"send_file"`
+	Method   string `json:"method"`
+	Headers  string `json:"headers"`
 }
 
 type ProjectInfo struct {
@@ -73,12 +83,12 @@ func init() {
 		Port:      "29800",
 		IsRunning: false,
 		Endpoints: []EndpointConfig{
-			{Path: "/api/audioTask/getAuditTaskResult", ResponseFile: "", IsActive: true},
-			{Path: "/api/test1", ResponseFile: "", IsActive: true},
-			{Path: "/api/test2", ResponseFile: "", IsActive: true},
-			{Path: "/api/test3", ResponseFile: "", IsActive: true},
-			{Path: "/api/test4", ResponseFile: "", IsActive: true},
+			{Name: "音频任务审计结果", Path: "/api/audioTask/getAuditTaskResult", ResponseFile: ""},
+			{Name: "测试接口1", Path: "/api/test1", ResponseFile: ""},
+			{Name: "测试接口2", Path: "/api/test2", ResponseFile: ""},
+			{Name: "测试接口3", Path: "/api/test3", ResponseFile: ""},
 		},
+		SendBlocks:  []SendBlock{},
 		RequestLogs: []RequestLog{},
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
@@ -140,6 +150,7 @@ func main() {
 		api.POST("/send", sendRequest)
 		api.GET("/files", listJSONFiles)
 		api.POST("/save-json", saveJSONFile)
+		api.GET("/read-json", readJSONFile)
 		api.GET("/projects", listProjects)
 		api.POST("/projects", createProject)
 		api.POST("/switch-project", switchProject)
@@ -214,11 +225,12 @@ func getStatus(c *gin.Context) {
 	defer server.mu.RUnlock()
 
 	response := map[string]interface{}{
-		"ip":           server.IP,
-		"port":         server.Port,
-		"is_running":   server.IsRunning,
-		"endpoints":    server.Endpoints,
-		"request_logs": server.RequestLogs,
+		"ip":              server.IP,
+		"port":            server.Port,
+		"is_running":      server.IsRunning,
+		"endpoints":       server.Endpoints,
+		"send_blocks":     server.SendBlocks,
+		"request_logs":    server.RequestLogs,
 		"current_project": currentProject,
 	}
 
@@ -242,14 +254,12 @@ func startServer(c *gin.Context) {
 
 	// 设置动态路由处理
 	for _, endpoint := range server.Endpoints {
-		if endpoint.IsActive {
-			path := endpoint.Path
-			responseFile := endpoint.ResponseFile
+		path := endpoint.Path
+		responseFile := endpoint.ResponseFile
 
-			server.engine.Any(path, func(c *gin.Context) {
-				handleDynamicEndpoint(c, path, responseFile)
-			})
-		}
+		server.engine.Any(path, func(c *gin.Context) {
+			handleDynamicEndpoint(c, path, responseFile)
+		})
 	}
 
 	// 在单独的goroutine中启动服务器
@@ -295,9 +305,10 @@ func stopServer(c *gin.Context) {
 
 func updateConfig(c *gin.Context) {
 	var config struct {
-		IP        string           `json:"ip"`
-		Port      string           `json:"port"`
-		Endpoints []EndpointConfig `json:"endpoints"`
+		IP         string           `json:"ip"`
+		Port       string           `json:"port"`
+		Endpoints  []EndpointConfig `json:"endpoints"`
+		SendBlocks []SendBlock      `json:"send_blocks"`
 	}
 
 	if err := c.ShouldBindJSON(&config); err != nil {
@@ -309,6 +320,7 @@ func updateConfig(c *gin.Context) {
 	server.IP = config.IP
 	server.Port = config.Port
 	server.Endpoints = config.Endpoints
+	server.SendBlocks = config.SendBlocks
 	server.mu.Unlock()
 
 	// 保存配置到文件
@@ -484,14 +496,47 @@ func saveJSONFile(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "文件保存成功"})
 }
 
+func readJSONFile(c *gin.Context) {
+	filename := c.Query("file")
+
+	if filename == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "文件名不能为空"})
+		return
+	}
+
+	// 验证文件名安全性
+	if strings.Contains(filename, "..") || strings.Contains(filename, "/") || strings.Contains(filename, "\\") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "非法文件名"})
+		return
+	}
+
+	// 读取文件
+	filePath := filepath.Join(getJSONFilesPath(currentProject), filename)
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "读取文件失败: " + err.Error()})
+		return
+	}
+
+	// 解析JSON并返回
+	var jsonData interface{}
+	if err := json.Unmarshal(data, &jsonData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "文件不是有效的JSON格式: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, jsonData)
+}
+
 const globalConfigFileName = "config.json"
 
 func saveConfig() error {
 	server.mu.RLock()
 	config := Config{
-		IP:        server.IP,
-		Port:      server.Port,
-		Endpoints: server.Endpoints,
+		IP:         server.IP,
+		Port:       server.Port,
+		Endpoints:  server.Endpoints,
+		SendBlocks: server.SendBlocks,
 	}
 	server.mu.RUnlock()
 
@@ -524,6 +569,7 @@ func loadConfig() error {
 	server.IP = config.IP
 	server.Port = config.Port
 	server.Endpoints = config.Endpoints
+	server.SendBlocks = config.SendBlocks
 	server.mu.Unlock()
 
 	log.Printf("项目 %s 配置文件加载成功", currentProject)
@@ -682,11 +728,14 @@ func createProject(c *gin.Context) {
 		IP:   "0.0.0.0",
 		Port: "29800",
 		Endpoints: []EndpointConfig{
-			{Path: "/api/test1", ResponseFile: "", IsActive: true},
-			{Path: "/api/test2", ResponseFile: "", IsActive: true},
-			{Path: "/api/test3", ResponseFile: "", IsActive: true},
-			{Path: "/api/test4", ResponseFile: "", IsActive: true},
-			{Path: "/api/test5", ResponseFile: "", IsActive: true},
+			{Name: "测试接口1", Path: "/api/test1", ResponseFile: ""},
+			{Name: "测试接口2", Path: "/api/test2", ResponseFile: ""},
+			{Name: "测试接口3", Path: "/api/test3", ResponseFile: ""},
+			{Name: "测试接口4", Path: "/api/test4", ResponseFile: ""},
+		},
+		SendBlocks: []SendBlock{
+			{Name: "", URL: "", SendFile: "", Method: "POST", Headers: `{"content-type":"application/json"}`},
+			{Name: "", URL: "", SendFile: "", Method: "POST", Headers: `{"content-type":"application/json"}`},
 		},
 	}
 

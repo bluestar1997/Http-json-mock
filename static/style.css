@@ -86,7 +86,7 @@ header h1 {
 .endpoints-grid-2cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
 }
 
 /* TAB导航样式 */

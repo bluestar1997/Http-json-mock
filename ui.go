@@ -17,27 +17,27 @@ func createHTMLTemplate() {
 <body>
     <div class="container">
         <!-- TAB导航 -->
-        <div class="tab-nav">
-            <button class="tab-btn active" data-tab="receive">接收部分</button>
-            <button class="tab-btn" data-tab="send">发送部分</button>
+        <div class="tab-nav" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #f5f5f5; border-bottom: 2px solid #ddd;">
+            <div style="display: flex; gap: 10px;">
+                <button class="tab-btn active" data-tab="receive">接收部分</button>
+                <button class="tab-btn" data-tab="send">发送部分</button>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <label style="margin: 0; font-weight: bold;">项目:</label>
+                <select id="project-select" onchange="switchProject()" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; background: white;">
+                    <!-- 动态填充项目列表 -->
+                </select>
+                <button onclick="createNewProject()" class="btn btn-info" style="padding: 5px 15px; white-space: nowrap;">+ 新建项目</button>
+                <button onclick="saveProjectConfig()" class="btn btn-primary" style="padding: 5px 15px; white-space: nowrap;">保存项目配置</button>
+            </div>
         </div>
 
         <div class="main-content">
             <!-- 接收部分TAB -->
             <div class="tab-content active" id="receive-tab">
-                <!-- 项目配置区域 -->
+                <!-- 服务器配置区域 -->
                 <section class="section compact">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h2 style="margin: 0;">项目配置</h2>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <label style="margin: 0;">项目:</label>
-                            <select id="project-select" onchange="switchProject()" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; background: white;">
-                                <!-- 动态填充项目列表 -->
-                            </select>
-                            <button onclick="createNewProject()" class="btn btn-info" style="padding: 5px 15px; white-space: nowrap;">+ 新建项目</button>
-                            <button onclick="saveProjectConfig()" class="btn btn-primary" style="padding: 5px 15px; white-space: nowrap;">保存项目配置</button>
-                        </div>
-                    </div>
+                    <h2>服务器配置</h2>
                     <div class="config-form">
                         <div class="form-row">
                             <div class="form-group">
@@ -63,7 +63,7 @@ func createHTMLTemplate() {
 
                 <!-- 接口配置区域 -->
                 <section class="section compact">
-                    <h2>接口配置 (最多5个)</h2>
+                    <h2>接口配置</h2>
                     <div id="endpoints-config" class="endpoints-grid-2cols">
                         <!-- 动态生成接口配置 -->
                     </div>
@@ -73,11 +73,15 @@ func createHTMLTemplate() {
                         <div class="json-editor-header">
                             <h3 id="json-file-name">编辑JSON文件</h3>
                             <div class="json-editor-actions">
-                                <button id="save-json" class="btn btn-primary">保存</button>
+                                <button id="edit-json" class="btn btn-info" style="display: none;">编辑</button>
+                                <button id="save-json" class="btn btn-primary" style="display: none;">保存</button>
                                 <button id="close-json-editor" class="btn btn-secondary">关闭</button>
                             </div>
                         </div>
-                        <textarea id="json-content" class="json-textarea" placeholder="JSON内容..."></textarea>
+                        <div style="padding: 8px 10px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; margin-bottom: 10px; color: #856404; font-size: 13px;">
+                            ⚠️ 注意：修改后需要保存才能生效
+                        </div>
+                        <textarea id="json-content" class="json-textarea" placeholder="JSON内容..." readonly style="background-color: #f5f5f5;"></textarea>
                     </div>
                 </section>
 
@@ -96,45 +100,12 @@ func createHTMLTemplate() {
 
             <!-- 发送部分TAB -->
             <div class="tab-content" id="send-tab">
-                <!-- 发送请求区域 -->
-                <section class="section compact">
-                    <h2>发送HTTP请求</h2>
-                    <div class="request-form">
-                        <div class="form-row">
-                            <div class="form-group flex-grow">
-                                <label>URL:</label>
-                                <input type="text" id="request-url" placeholder="http://example.com/api/test">
-                            </div>
-                            <div class="form-group">
-                                <label>方法:</label>
-                                <select id="request-method">
-                                    <option value="GET">GET</option>
-                                    <option value="POST">POST</option>
-                                    <option value="PUT">PUT</option>
-                                    <option value="DELETE">DELETE</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>请求头:</label>
-                                <input type="text" id="request-headers" placeholder='{"Content-Type": "application/json"}'>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>请求数据 (JSON):</label>
-                            <textarea id="request-data" placeholder='{"key": "value"}' rows="6"></textarea>
-                        </div>
-                        <div class="form-actions">
-                            <button id="send-request" class="btn btn-primary">发送</button>
-                            <button id="format-json" class="btn btn-info">格式化</button>
-                        </div>
-                    </div>
-
-                    <!-- 响应结果 -->
-                    <div class="response-section">
-                        <h3>响应结果:</h3>
-                        <pre id="response-result"></pre>
-                    </div>
-                </section>
+                <div id="send-blocks-container">
+                    <!-- 发送块将通过JavaScript动态生成 -->
+                </div>
+                <div style="padding: 20px; text-align: center;">
+                    <button onclick="addSendBlock()" class="btn btn-success" style="padding: 10px 30px;">+ 添加发送块</button>
+                </div>
             </div>
         </div>
     </div>
@@ -235,7 +206,7 @@ header h1 {
 .endpoints-grid-2cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
 }
 
 /* TAB导航样式 */
@@ -728,12 +699,14 @@ func createJSFile() {
         this.connectWebSocket();
     }
 
-    init() {
+    async init() {
+        this.sendBlocks = [];
         this.bindEvents();
         this.loadProjects();
+        await this.loadJSONFiles();
         this.loadStatus();
-        this.loadJSONFiles();
         this.initTabs();
+        this.loadSendBlocks();
     }
 
     connectWebSocket() {
@@ -768,15 +741,12 @@ func createJSFile() {
         document.getElementById('start-server').addEventListener('click', () => this.startServer());
         document.getElementById('stop-server').addEventListener('click', () => this.stopServer());
 
-        // 发送请求
-        document.getElementById('send-request').addEventListener('click', () => this.sendRequest());
-        document.getElementById('format-json').addEventListener('click', () => this.formatJSON());
-
         // 日志管理
         document.getElementById('clear-logs').addEventListener('click', () => this.clearLogs());
         document.getElementById('refresh-logs').addEventListener('click', () => this.refreshLogs());
 
         // JSON编辑器
+        document.getElementById('edit-json').addEventListener('click', () => this.enableJSONEdit());
         document.getElementById('save-json').addEventListener('click', () => this.saveJSONFile());
         document.getElementById('close-json-editor').addEventListener('click', () => this.closeJSONEditor());
     }
@@ -796,11 +766,9 @@ func createJSFile() {
             const response = await fetch('/api/files');
             const files = await response.json();
             this.jsonFiles = files || [];
-            this.updateEndpointsUI();
         } catch (error) {
             console.error('加载JSON文件列表失败:', error);
             this.jsonFiles = [];
-            this.updateEndpointsUI();
         }
     }
 
@@ -859,26 +827,32 @@ func createJSFile() {
 
         this.endpoints.forEach((endpoint, index) => {
             const endpointDiv = document.createElement('div');
-            endpointDiv.className = ` + "`endpoint-item ${endpoint.is_active ? 'active' : ''}`;" + `
+            endpointDiv.className = 'endpoint-item';
+            endpointDiv.style.marginBottom = '5px';
 
             endpointDiv.innerHTML = ` + "`" + `
-                <div class="endpoint-checkbox">
-                    <input type="checkbox" id="endpoint-${index}" ${endpoint.is_active ? 'checked' : ''}
-                           onchange="tool.toggleEndpoint(${index})">
+                <div style="margin-bottom: 3px;">
+                    <input type="text" value="${endpoint.name || ''}"
+                           onchange="tool.updateEndpointName(${index}, this.value)"
+                           placeholder="接口名称"
+                           style="width: 100%; padding: 4px; font-size: 13px;">
                 </div>
-                <div class="endpoint-path">
-                    <input type="text" value="${endpoint.path}"
-                           onchange="tool.updateEndpointPath(${index}, this.value)"
-                           placeholder="/api/path">
-                </div>
-                <div class="endpoint-file">
-                    <select onchange="tool.updateEndpointFile(${index}, this.value)">
-                        <option value="">响应文件</option>
-                        ${this.jsonFiles.map(file =>
-                            ` + "`<option value=\"${file}\" ${endpoint.response_file === file ? 'selected' : ''}>${file.substring(0, 12)}${file.length > 12 ? '...' : ''}</option>`" + `
-                        ).join('')}
-                    </select>
-                    ${endpoint.response_file ? ` + "`<button class=\"btn-edit\" onclick=\"tool.editJSONFile('${endpoint.response_file}')\">编辑</button>`" + ` : ''}
+                <div style="display: flex; gap: 8px;">
+                    <div style="flex: 0 0 60%;">
+                        <input type="text" value="${endpoint.path}"
+                               onchange="tool.updateEndpointPath(${index}, this.value)"
+                               placeholder="/api/path"
+                               style="width: 100%; padding: 4px; font-size: 13px;">
+                    </div>
+                    <div style="flex: 0 0 40%;">
+                        <select onchange="tool.selectEndpointFile(${index}, this.value)"
+                                style="width: 100%; padding: 4px; font-size: 13px;">
+                            <option value="">响应文件</option>
+                            ${this.jsonFiles.map(file =>
+                                ` + "`<option value=\"${file}\" ${endpoint.response_file === file ? 'selected' : ''}>${file}</option>`" + `
+                            ).join('')}
+                        </select>
+                    </div>
                 </div>
             ` + "`;" + `
 
@@ -886,14 +860,22 @@ func createJSFile() {
         });
     }
 
-    toggleEndpoint(index) {
-        this.endpoints[index].is_active = !this.endpoints[index].is_active;
-        this.updateEndpointsUI();
+    updateEndpointName(index, name) {
+        this.endpoints[index].name = name;
     }
 
     updateEndpointFile(index, file) {
         this.endpoints[index].response_file = file;
-        this.updateEndpointsUI(); // 重新渲染UI以显示编辑按钮
+    }
+
+    // 选择接口文件并自动加载到编辑区
+    async selectEndpointFile(index, file) {
+        this.endpoints[index].response_file = file;
+
+        if (file) {
+            // 自动打开编辑器并加载文件
+            await this.editJSONFile(file);
+        }
     }
 
     updateEndpointPath(index, path) {
@@ -968,10 +950,14 @@ func createJSFile() {
     }
 
     async saveConfig() {
+        // 先更新发送块配置
+        await this.saveSendBlocksConfig();
+
         const config = {
             ip: document.getElementById('server-ip').value,
             port: document.getElementById('server-port').value,
-            endpoints: this.endpoints
+            endpoints: this.endpoints,
+            send_blocks: this.sendBlocks
         };
 
         try {
@@ -1076,6 +1062,372 @@ func createJSFile() {
         }
     }
 
+    // 加载发送块配置
+    async loadSendBlocks() {
+        try {
+            const response = await fetch('/api/status');
+            const data = await response.json();
+
+            // 如果配置中有send_blocks，使用配置的；否则使用默认的2个块
+            if (data.send_blocks && data.send_blocks.length > 0) {
+                this.sendBlocks = data.send_blocks;
+            } else {
+                this.sendBlocks = [
+                    { name: '', url: '', send_file: '', method: 'POST', headers: '{"content-type":"application/json"}' },
+                    { name: '', url: '', send_file: '', method: 'POST', headers: '{"content-type":"application/json"}' }
+                ];
+            }
+            this.renderSendBlocks();
+        } catch (error) {
+            console.error('加载发送块配置失败:', error);
+            // 使用默认配置
+            this.sendBlocks = [
+                { name: '', url: '', send_file: '', method: 'POST', headers: '{"content-type":"application/json"}' },
+                { name: '', url: '', send_file: '', method: 'POST', headers: '{"content-type":"application/json"}' }
+            ];
+            this.renderSendBlocks();
+        }
+    }
+
+    // 渲染所有发送块
+    renderSendBlocks() {
+        const container = document.getElementById('send-blocks-container');
+        container.innerHTML = '';
+
+        this.sendBlocks.forEach((block, index) => {
+            container.appendChild(this.createSendBlockElement(block, index));
+        });
+    }
+
+    // 创建单个发送块元素
+    createSendBlockElement(block, index) {
+        const section = document.createElement('section');
+        section.className = 'section compact send-block';
+        section.style.marginBottom = '20px';
+        section.style.border = '1px solid #ddd';
+        section.style.borderRadius = '4px';
+        section.style.padding = '15px';
+
+        const html = ` + "`" + `
+            <div style="margin-bottom: 10px;">
+                <input type="text" id="send-name-${index}" value="${block.name || ''}" placeholder="请输入发送功能描述" style="width: 100%; padding: 8px; font-size: 14px; font-weight: bold; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div class="send-block-form">
+                <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end;">
+                    <div class="form-group" style="flex: 0 0 100px;">
+                        <select id="send-method-${index}" style="width: 100%; padding: 8px;">
+                            <option value="POST" ${block.method === 'POST' ? 'selected' : ''}>POST</option>
+                            <option value="GET" ${block.method === 'GET' ? 'selected' : ''}>GET</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <input type="text" id="send-url-${index}" value="${block.url || ''}" placeholder="http://..." style="width: 100%; padding: 8px;">
+                    </div>
+                    <div class="form-group" style="flex: 0 0 180px;">
+                        <select id="send-file-${index}" onchange="tool.loadSendFile(${index})" style="width: 100%; padding: 8px;">
+                            <option value="">选择JSON文件</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 0 0 260px;">
+                        <input type="text" id="send-headers-${index}" value='${block.headers || '{"content-type":"application/json"}'}' placeholder='{"content-type":"application/json"}' style="width: 100%; padding: 8px;">
+                    </div>
+                    <div class="form-actions" style="display: flex; gap: 5px;">
+                        <button onclick="tool.sendBlockRequest(${index})" class="btn btn-primary" style="padding: 8px 20px;">发送</button>
+                    </div>
+                </div>
+                <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <label style="margin: 0;">请求数据 (JSON):</label>
+                            <div style="display: flex; gap: 5px;">
+                                <button id="edit-btn-${index}" onclick="tool.enableEditMode(${index})" class="btn btn-info" style="padding: 3px 10px;">编辑</button>
+                                <button id="format-btn-${index}" onclick="tool.formatSendBlockJSON(${index})" class="btn btn-info" style="padding: 3px 10px; display: none;">格式化</button>
+                                <button id="save-btn-${index}" onclick="tool.saveSendBlockData(${index})" class="btn btn-success" style="padding: 3px 10px; display: none;">保存</button>
+                            </div>
+                        </div>
+                        <textarea id="send-data-${index}" rows="6" placeholder='{"key": "value"}' style="width: 100%; background-color: #f5f5f5;" readonly>${block.data || ''}</textarea>
+                    </div>
+                </div>
+                <div class="response-section">
+                    <h4>响应结果:</h4>
+                    <pre id="send-response-${index}" style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"></pre>
+                </div>
+            </div>
+        ` + "`" + `;
+
+        section.innerHTML = html;
+
+        // 填充文件列表
+        setTimeout(() => {
+            const fileSelect = document.getElementById(` + "`send-file-${index}`" + `);
+            if (fileSelect && this.jsonFiles) {
+                this.jsonFiles.forEach(file => {
+                    const option = document.createElement('option');
+                    option.value = file;
+                    option.textContent = file;
+                    if (file === block.send_file) {
+                        option.selected = true;
+                    }
+                    fileSelect.appendChild(option);
+                });
+            }
+        }, 100);
+
+        return section;
+    }
+
+    // 添加新的发送块
+    addSendBlock() {
+        this.sendBlocks.push({
+            name: '',
+            url: '',
+            send_file: '',
+            method: 'POST',
+            headers: '{"content-type":"application/json"}'
+        });
+        this.renderSendBlocks();
+        this.saveSendBlocksConfig();
+    }
+
+    // 发送块的请求
+    async sendBlockRequest(index) {
+        const url = document.getElementById(` + "`send-url-${index}`" + `).value;
+        const method = document.getElementById(` + "`send-method-${index}`" + `).value;
+        const headersText = document.getElementById(` + "`send-headers-${index}`" + `).value;
+        const data = document.getElementById(` + "`send-data-${index}`" + `).value;
+
+        if (!url) {
+            alert('请输入请求URL');
+            return;
+        }
+
+        let headers = {};
+        if (headersText) {
+            try {
+                headers = JSON.parse(headersText);
+            } catch (error) {
+                alert('请求头格式错误: ' + error.message);
+                return;
+            }
+        }
+
+        const request = {
+            url: url,
+            method: method,
+            headers: headers,
+            data: data
+        };
+
+        try {
+            const response = await fetch('/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            });
+            const result = await response.json();
+
+            const responseElement = document.getElementById(` + "`send-response-${index}`" + `);
+            if (response.ok) {
+                let displayText = ` + "`状态码: ${result.status}\n\n`;" + `
+                displayText += "响应头:\n";
+                for (const [key, value] of Object.entries(result.headers)) {
+                    displayText += ` + "`${key}: ${value}\n`;" + `
+                }
+                displayText += "\n响应体:\n";
+                try {
+                    const jsonBody = JSON.parse(result.body);
+                    displayText += JSON.stringify(jsonBody, null, 2);
+                } catch {
+                    displayText += result.body;
+                }
+                responseElement.textContent = displayText;
+            } else {
+                responseElement.textContent = '发送请求失败: ' + result.error;
+            }
+        } catch (error) {
+            document.getElementById(` + "`send-response-${index}`" + `).textContent = '发送请求失败: ' + error.message;
+        }
+
+        // 保存当前配置
+        this.updateSendBlockConfig(index);
+    }
+
+    // 启用编辑模式
+    async enableEditMode(index) {
+        const dataField = document.getElementById(` + "`send-data-${index}`" + `);
+        const sendFileSelect = document.getElementById(` + "`send-file-${index}`" + `);
+        const editBtn = document.getElementById(` + "`edit-btn-${index}`" + `);
+        const formatBtn = document.getElementById(` + "`format-btn-${index}`" + `);
+        const saveBtn = document.getElementById(` + "`save-btn-${index}`" + `);
+
+        // 如果请求数据为空且选择了发送文件，则自动加载文件内容
+        if (!dataField.value.trim() && sendFileSelect.value) {
+            try {
+                const response = await fetch(` + "`/api/read-json?file=${encodeURIComponent(sendFileSelect.value)}`" + `);
+                if (response.ok) {
+                    const result = await response.json();
+                    dataField.value = JSON.stringify(result, null, 2);
+                }
+            } catch (error) {
+                console.error('加载文件失败:', error);
+            }
+        }
+
+        // 移除只读属性
+        dataField.removeAttribute('readonly');
+        dataField.style.backgroundColor = '#fff';
+
+        // 切换按钮显示
+        editBtn.style.display = 'none';
+        formatBtn.style.display = 'inline-block';
+        saveBtn.style.display = 'inline-block';
+    }
+
+    // 禁用编辑模式
+    disableEditMode(index) {
+        const dataField = document.getElementById(` + "`send-data-${index}`" + `);
+        const editBtn = document.getElementById(` + "`edit-btn-${index}`" + `);
+        const formatBtn = document.getElementById(` + "`format-btn-${index}`" + `);
+        const saveBtn = document.getElementById(` + "`save-btn-${index}`" + `);
+
+        // 添加只读属性
+        dataField.setAttribute('readonly', 'readonly');
+        dataField.style.backgroundColor = '#f5f5f5';
+
+        // 切换按钮显示
+        editBtn.style.display = 'inline-block';
+        formatBtn.style.display = 'none';
+        saveBtn.style.display = 'none';
+    }
+
+    // 格式化发送块的JSON
+    formatSendBlockJSON(index) {
+        const dataField = document.getElementById(` + "`send-data-${index}`" + `);
+        try {
+            if (dataField.value.trim()) {
+                const parsed = JSON.parse(dataField.value);
+                dataField.value = JSON.stringify(parsed, null, 2);
+            }
+        } catch (error) {
+            alert('JSON格式错误: ' + error.message);
+        }
+    }
+
+    // 保存发送块的数据到文件
+    async saveSendBlockData(index) {
+        const sendFile = document.getElementById(` + "`send-file-${index}`" + `).value;
+        const data = document.getElementById(` + "`send-data-${index}`" + `).value;
+
+        if (!sendFile) {
+            alert('请先选择发送文件');
+            return;
+        }
+
+        if (!data.trim()) {
+            alert('请求数据为空');
+            return;
+        }
+
+        // 验证JSON格式
+        try {
+            JSON.parse(data);
+        } catch (error) {
+            alert('JSON格式错误，无法保存: ' + error.message);
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/save-json', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filename: sendFile,
+                    content: data
+                })
+            });
+
+            if (response.ok) {
+                alert('保存成功');
+                // 保存成功后退出编辑模式
+                this.disableEditMode(index);
+            } else {
+                const result = await response.json();
+                alert('保存失败: ' + result.error);
+            }
+        } catch (error) {
+            alert('保存失败: ' + error.message);
+        }
+    }
+
+    // 加载发送文件内容
+    async loadSendFile(index) {
+        const sendFile = document.getElementById(` + "`send-file-${index}`" + `).value;
+
+        if (!sendFile) {
+            document.getElementById(` + "`send-data-${index}`" + `).value = '';
+            return;
+        }
+
+        try {
+            const response = await fetch(` + "`/api/read-json?file=${encodeURIComponent(sendFile)}`" + `);
+            if (response.ok) {
+                const result = await response.json();
+                document.getElementById(` + "`send-data-${index}`" + `).value = JSON.stringify(result, null, 2);
+                // 加载文件后自动进入编辑模式
+                this.enableEditMode(index);
+            } else {
+                alert('读取文件失败');
+            }
+        } catch (error) {
+            console.error('读取文件失败:', error);
+        }
+
+        // 更新配置
+        this.updateSendBlockConfig(index);
+    }
+
+    // 更新单个发送块配置
+    updateSendBlockConfig(index) {
+        if (index >= 0 && index < this.sendBlocks.length) {
+            this.sendBlocks[index] = {
+                name: document.getElementById(` + "`send-name-${index}`" + `).value,
+                url: document.getElementById(` + "`send-url-${index}`" + `).value,
+                send_file: document.getElementById(` + "`send-file-${index}`" + `).value,
+                method: document.getElementById(` + "`send-method-${index}`" + `).value,
+                headers: document.getElementById(` + "`send-headers-${index}`" + `).value
+            };
+            this.saveSendBlocksConfig();
+        }
+    }
+
+    // 保存发送块配置到服务器
+    async saveSendBlocksConfig() {
+        // 收集所有发送块的当前配置
+        const blocks = [];
+        for (let i = 0; i < this.sendBlocks.length; i++) {
+            const nameElem = document.getElementById(` + "`send-name-${i}`" + `);
+            const urlElem = document.getElementById(` + "`send-url-${i}`" + `);
+            const fileElem = document.getElementById(` + "`send-file-${i}`" + `);
+            const methodElem = document.getElementById(` + "`send-method-${i}`" + `);
+            const headersElem = document.getElementById(` + "`send-headers-${i}`" + `);
+
+            if (nameElem && urlElem && fileElem && methodElem && headersElem) {
+                blocks.push({
+                    name: nameElem.value,
+                    url: urlElem.value,
+                    send_file: fileElem.value,
+                    method: methodElem.value,
+                    headers: headersElem.value
+                });
+            }
+        }
+
+        this.sendBlocks = blocks;
+
+        // 这个配置会在saveProjectConfig时一起保存
+        console.log('发送块配置已更新', this.sendBlocks);
+    }
+
     async refreshLogs() {
         try {
             const response = await fetch('/api/logs');
@@ -1162,27 +1514,61 @@ func createJSFile() {
 
     async editJSONFile(filename) {
         try {
-            const response = await fetch(` + "`/json_files/${filename}`" + `);
+            const response = await fetch(` + "`/api/read-json?file=${encodeURIComponent(filename)}`" + `);
             if (response.ok) {
-                const content = await response.text();
+                const jsonData = await response.json();
+                const textarea = document.getElementById('json-content');
+                const editBtn = document.getElementById('edit-json');
+                const saveBtn = document.getElementById('save-json');
+
                 document.getElementById('json-file-name').textContent = ` + "`编辑: ${filename}`;" + `
-                document.getElementById('json-content').value = content;
+                // 格式化JSON显示
+                textarea.value = JSON.stringify(jsonData, null, 2);
                 document.getElementById('json-editor').style.display = 'block';
                 this.currentEditingFile = filename;
 
-                // 格式化JSON显示
-                try {
-                    const parsed = JSON.parse(content);
-                    document.getElementById('json-content').value = JSON.stringify(parsed, null, 2);
-                } catch (e) {
-                    // 如果不是有效JSON，保持原样
-                }
+                // 重置为只读模式
+                textarea.setAttribute('readonly', 'readonly');
+                textarea.style.backgroundColor = '#f5f5f5';
+                editBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
             } else {
-                this.showMessage('无法读取文件', 'error');
+                const error = await response.json();
+                this.showMessage('无法读取文件: ' + (error.error || '未知错误'), 'error');
             }
         } catch (error) {
             this.showMessage('读取文件失败: ' + error.message, 'error');
         }
+    }
+
+    // 启用JSON编辑模式
+    enableJSONEdit() {
+        const textarea = document.getElementById('json-content');
+        const editBtn = document.getElementById('edit-json');
+        const saveBtn = document.getElementById('save-json');
+
+        // 移除只读属性
+        textarea.removeAttribute('readonly');
+        textarea.style.backgroundColor = '#fff';
+
+        // 切换按钮显示
+        editBtn.style.display = 'none';
+        saveBtn.style.display = 'inline-block';
+    }
+
+    // 禁用JSON编辑模式
+    disableJSONEdit() {
+        const textarea = document.getElementById('json-content');
+        const editBtn = document.getElementById('edit-json');
+        const saveBtn = document.getElementById('save-json');
+
+        // 添加只读属性
+        textarea.setAttribute('readonly', 'readonly');
+        textarea.style.backgroundColor = '#f5f5f5';
+
+        // 切换按钮显示
+        editBtn.style.display = 'inline-block';
+        saveBtn.style.display = 'none';
     }
 
     async saveJSONFile() {
@@ -1215,6 +1601,8 @@ func createJSFile() {
 
             if (response.ok) {
                 this.showMessage('文件保存成功', 'success');
+                // 保存成功后退出编辑模式
+                this.disableJSONEdit();
             } else {
                 const result = await response.json();
                 this.showMessage('保存失败: ' + result.error, 'error');
@@ -1358,6 +1746,11 @@ async function saveProjectConfig() {
     } catch (error) {
         alert('保存项目配置失败: ' + error.message);
     }
+}
+
+// 全局函数：添加发送块
+function addSendBlock() {
+    tool.addSendBlock();
 }
 
 // 初始化应用
