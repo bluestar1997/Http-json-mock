@@ -69,7 +69,7 @@ var currentProject = "default"
 
 func init() {
 	server = &Server{
-		IP:        "192.168.1.100",
+		IP:        "0.0.0.0",
 		Port:      "29800",
 		IsRunning: false,
 		Endpoints: []EndpointConfig{
@@ -679,7 +679,7 @@ func createProject(c *gin.Context) {
 
 	// 创建默认配置文件
 	defaultConfig := Config{
-		IP:   "192.168.1.100",
+		IP:   "0.0.0.0",
 		Port: "29800",
 		Endpoints: []EndpointConfig{
 			{Path: "/api/test1", ResponseFile: "", IsActive: true},
